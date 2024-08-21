@@ -2,16 +2,20 @@ window.onload = function() {
     const canvas = document.getElementById("poopCanvas");
     const ctx = canvas.getContext("2d");
 
-    canvas.width = 500;
-    canvas.height = 500;
+    // Устанавливаем размеры холста равными размерам окна
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas(); // Первоначальный вызов для установки правильного размера
 
     let gameOver = false;
 
     // Параметры вентилятора
     let fan = {
-        x: canvas.width / 2,
-        y: canvas.height / 2,
-        size: 40, // Размер вентилятора (в 2 раза больше какашки)
+        size: Math.min(canvas.width, canvas.height) * 0.1, // Размер вентилятора 10% от меньшей стороны экрана
         rotation: 0, // Начальный угол вращения
         speed: 0.05 // Скорость вращения
     };
@@ -20,7 +24,7 @@ window.onload = function() {
     let crosshair = {
         x: 0,
         y: 0,
-        size: 20 // Размер прицела
+        size: Math.min(canvas.width, canvas.height) * 0.04 // Размер прицела 4% от меньшей стороны экрана
     };
 
     // Список всех какашек
@@ -31,7 +35,7 @@ window.onload = function() {
         let poop = {
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
-            size: 20, // Размер какашки
+            size: Math.min(canvas.width, canvas.height) * 0.04, // Размер какашки 4% от меньшей стороны экрана
             emoji: '💩', // Эмодзи какашки
             speed: 1 + Math.random() * 2, // Случайная скорость
             alive: true // Флаг жизни какашки
@@ -44,14 +48,25 @@ window.onload = function() {
     // Создаём новые какашки каждые 2 секунды
     setInterval(spawnPoop, 2000);
 
-    // Обработка движения мыши для прицела
+    // Обработка движения мыши и тач-событий для прицела
+    function updateCrosshair(x, y) {
+        crosshair.x = x;
+        crosshair.y = y;
+    }
+
     canvas.addEventListener('mousemove', function(event) {
-        crosshair.x = event.clientX - canvas.getBoundingClientRect().left;
-        crosshair.y = event.clientY - canvas.getBoundingClientRect().top;
+        const rect = canvas.getBoundingClientRect();
+        updateCrosshair(event.clientX - rect.left, event.clientY - rect.top);
     });
 
-    // Обработка клика мыши для уничтожения какашки
-    canvas.addEventListener('click', function() {
+    canvas.addEventListener('touchmove', function(event) {
+        const touch = event.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        updateCrosshair(touch.clientX - rect.left, touch.clientY - rect.top);
+    });
+
+    // Обработка клика мыши и тач-событий для уничтожения какашки
+    function handleClickOrTouch() {
         poops.forEach((poop) => {
             if (poop.alive) {
                 let dx = crosshair.x - poop.x;
@@ -64,6 +79,13 @@ window.onload = function() {
                 }
             }
         });
+    }
+
+    canvas.addEventListener('click', handleClickOrTouch);
+
+    canvas.addEventListener('touchstart', function(event) {
+        handleClickOrTouch();
+        event.preventDefault(); // Отключаем нежелательные эффекты, такие как скролл
     });
 
     function drawPoop(poop) {
@@ -76,17 +98,16 @@ window.onload = function() {
     }
 
     function drawFan() {
-        // Сохранить текущие параметры контекста
         ctx.save();
 
-        // Переместить центр к вентилятору
-        ctx.translate(fan.x, fan.y);
+        // Устанавливаем центр вращения вентилятора
+        ctx.translate(canvas.width / 2, canvas.height / 2);
 
-        // Вращать вокруг центра вентилятора
+        // Вращаем вентилятор
         ctx.rotate(fan.rotation);
 
-        // Нарисовать 4 лопасти вентилятора (крестовина)
-        ctx.fillStyle = '#999'; // Цвет вентилятора
+        // Рисуем лопасти вентилятора
+        ctx.fillStyle = '#999';
         for (let i = 0; i < 4; i++) {
             ctx.beginPath();
             ctx.rect(-fan.size / 8, -fan.size, fan.size / 4, fan.size);
@@ -94,12 +115,11 @@ window.onload = function() {
             ctx.rotate(Math.PI / 2); // Повернуть на 90 градусов
         }
 
-        // Восстановить исходное состояние контекста
         ctx.restore();
     }
 
     function drawCrosshair() {
-        // Нарисовать перекрестие прицела
+        // Рисуем перекрестие прицела
         ctx.strokeStyle = 'red';
         ctx.lineWidth = 2;
 
@@ -117,8 +137,8 @@ window.onload = function() {
     }
 
     function checkGameOver(poop) {
-        let dx = poop.x - fan.x;
-        let dy = poop.y - fan.y;
+        let dx = poop.x - canvas.width / 2;
+        let dy = poop.y - canvas.height / 2;
         let distance = Math.sqrt(dx * dx + dy * dy);
 
         // Если какашка долетела до вентилятора
@@ -130,8 +150,8 @@ window.onload = function() {
     function movePoops() {
         poops.forEach((poop) => {
             if (poop.alive) {
-                let dx = fan.x - poop.x;
-                let dy = fan.y - poop.y;
+                let dx = canvas.width / 2 - poop.x;
+                let dy = canvas.height / 2 - poop.y;
                 let distance = Math.sqrt(dx * dx + dy * dy);
 
                 // Нормализуем вектор направления и перемещаем какашку
@@ -146,33 +166,32 @@ window.onload = function() {
 
     function drawGameOver() {
         ctx.fillStyle = 'black';
-        ctx.font = 'bold 50px Arial';
+        ctx.font = `bold ${Math.min(canvas.width, canvas.height) * 0.1}px Arial`;
         ctx.textAlign = 'center';
         ctx.fillText('GAME OVER!', canvas.width / 2, canvas.height / 2);
     }
 
     function gameLoop() {
-        // Очистить холст
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         if (!gameOver) {
-            // Вращать вентилятор
+            // Вращение вентилятора
             fan.rotation += fan.speed;
 
-            // Отрисовать вентилятор, какашки и прицел
+            // Отрисовка вентилятора, какашек и прицела
             drawFan();
             poops.forEach(drawPoop);
             drawCrosshair();
 
-            // Двигать какашки
+            // Движение какашек
             movePoops();
 
             requestAnimationFrame(gameLoop);
         } else {
-            // Если игра окончена
+            // Конец игры
             ctx.fillStyle = '#8B4513'; // Коричневый фон
-            ctx.fillRect(0, 0, canvas.width, canvas.height); // Закрасить весь экран
-            drawGameOver(); // Нарисовать "GAME OVER!"
+            ctx.fillRect(0, 0, canvas.width, canvas.height); // Закрашиваем холст
+            drawGameOver(); // Рисуем надпись "GAME OVER!"
         }
     }
 
