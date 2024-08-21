@@ -99,24 +99,27 @@ window.onload = function() {
 
     function drawFan() {
         ctx.save();
-
+    
         // Устанавливаем центр вращения вентилятора
         ctx.translate(canvas.width / 2, canvas.height / 2);
-
+    
         // Вращаем вентилятор
         ctx.rotate(fan.rotation);
-
+    
         // Рисуем лопасти вентилятора
         ctx.fillStyle = '#999';
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 3; i++) { // Количество лопастей - 3
             ctx.beginPath();
-            ctx.rect(-fan.size / 8, -fan.size, fan.size / 4, fan.size);
+            // Эллипс: x, y - центр, радиусы по x и y, угол поворота, начальный и конечный угол
+            ctx.ellipse(0, -fan.size / 2, fan.size / 8, fan.size, 0, 0, 2 * Math.PI);
             ctx.fill();
-            ctx.rotate(Math.PI / 2); // Повернуть на 90 градусов
+            // Поворачиваем каждую лопасть на 120 градусов (2 * PI / 3)
+            ctx.rotate((2 * Math.PI) / 3);
         }
-
+    
         ctx.restore();
     }
+    
 
     function drawCrosshair() {
         // Рисуем перекрестие прицела
