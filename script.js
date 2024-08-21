@@ -74,7 +74,7 @@ window.onload = function() {
                 let distance = Math.sqrt(dx * dx + dy * dy);
 
                 // Если прицел попал на какашку, она "уничтожается"
-                if (distance < poop.size) {
+                if (distance < 50) {
                     poop.alive = false;
                 }
             }
