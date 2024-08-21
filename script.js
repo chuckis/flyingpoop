@@ -27,6 +27,31 @@ window.onload = function() {
         size: Math.min(canvas.width, canvas.height) * 0.04 // Размер прицела 4% от меньшей стороны экрана
     };
 
+    // Функция для перезапуска игры
+    function restartGame() {
+        gameOver = false;
+        poops = []; // Очистить массив какашек
+        restartButton.style.display = 'none'; // Скрыть кнопку
+        gameLoop(); // Запустить цикл игры снова
+    }
+
+    // Показываем кнопку "START AGAIN" при завершении игры
+    function showGameOverScreen() {
+        // Рисуем GAME OVER
+        ctx.fillStyle = '#8B4513'; // Коричневый фон
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'black';
+        ctx.font = `bold ${Math.min(canvas.width, canvas.height) * 0.1}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.fillText('GAME OVER!', canvas.width / 2, canvas.height / 2);
+
+        // Показать кнопку для перезапуска
+        restartButton.style.display = 'block';
+    }
+
+    // Добавляем обработчик на кнопку "START AGAIN"
+    restartButton.addEventListener('click', restartGame);
+
     // Список всех какашек
     let poops = [];
 
@@ -74,7 +99,7 @@ window.onload = function() {
                 let distance = Math.sqrt(dx * dx + dy * dy);
 
                 // Если прицел попал на какашку, она "уничтожается"
-                if (distance < 50) {
+                if (distance < 60) {
                     poop.alive = false;
                 }
             }
@@ -175,27 +200,18 @@ window.onload = function() {
     }
 
     function gameLoop() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
         if (!gameOver) {
-            // Вращение вентилятора
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            movePoops();
             fan.rotation += fan.speed;
-
-            // Отрисовка вентилятора, какашек и прицела
             drawFan();
             poops.forEach(drawPoop);
             drawCrosshair();
-
-            // Движение какашек
-            movePoops();
-
             requestAnimationFrame(gameLoop);
         } else {
-            // Конец игры
-            ctx.fillStyle = '#8B4513'; // Коричневый фон
-            ctx.fillRect(0, 0, canvas.width, canvas.height); // Закрашиваем холст
-            drawGameOver(); // Рисуем надпись "GAME OVER!"
+            showGameOverScreen(); // Показываем GAME OVER и кнопку
         }
+    
     }
 
     gameLoop();
