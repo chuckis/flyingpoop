@@ -10,6 +10,12 @@ window.onload = function() {
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
+    // Telegrsm bot stuff
+    const WebApp = window.Telegram.WebApp;
+
+    // WebApp.showAlert(`Welcome, @${WebApp.WebAppUser.username}. Let's start a game`);
+    WebApp.expand();
+
     let gameOver = false;
     let score = 0; // Переменная для хранения очков
 
@@ -46,7 +52,7 @@ window.onload = function() {
         ctx.textAlign = 'center';
         ctx.fillText('GAME OVER!', canvas.width / 2, canvas.height / 2);
         restartButton.style.display = 'block';
-        console.log(score);
+        sendScoreToTelegram(score);
     }
 
     restartButton.addEventListener('click', restartGame);
@@ -128,6 +134,14 @@ window.onload = function() {
         }
         ctx.restore();
     }
+
+    function sendScoreToTelegram(score) {
+        const data = JSON.stringify({
+            score: score
+        });
+        WebApp.sendData(data);
+    }
+    
 
     function checkGameOver(poop) {
         let dx = poop.x - canvas.width / 2;
