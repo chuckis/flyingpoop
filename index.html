@@ -20,7 +20,20 @@
             width: 100%; /* canvas адаптируется под ширину экрана */
             height: 100%; /* canvas адаптируется под высоту экрана */
         }
-        /* Позиционирование кнопки "START AGAIN" */
+
+        #scoreContainer {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+            color: black;
+            z-index: 1000; /* Чтобы блок всегда был поверх канваса */
+        }
+        
         #restartButton {
             display: none; /* Скрываем кнопку до окончания игры */
             position: absolute;
@@ -51,7 +64,7 @@
     <script async defer src="https://buttons.github.io/buttons.js"></script>
 </head>
 <body>
-
+    <div id="scoreContainer">SCORE: 0</div>
     <button id="restartButton">RESTART</button>
     <!-- Контейнер для кнопки -->
     <div class="github-button-container">

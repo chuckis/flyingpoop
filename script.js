@@ -15,10 +15,7 @@ window.onload = function() {
 
     function updateScore() {
         score++;
-        ctx.fillStyle = 'black';
-        ctx.font = '20px Arial';
-        ctx.textAlign = 'left';
-        ctx.fillText(`Очки: ${score}`, 10, 30); // Отображаем очки в верхнем левом углу
+        document.getElementById('scoreContainer').innerText = `SCORE: ${score}`;
     }
 
     let fan = {
