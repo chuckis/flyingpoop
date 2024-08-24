@@ -12,9 +12,16 @@ window.onload = function() {
 
     // Telegrsm bot stuff
     const WebApp = window.Telegram.WebApp;
-
+    
+    WebApp.ready()
     // WebApp.showAlert(`Welcome, @${WebApp.WebAppUser.username}. Let's start a game`);
     WebApp.expand();
+
+    WebApp.MainButton.setText('EXIT').show().onClick(function () {
+        console.log("send score!");
+        sendScoreToTelegram(score);
+        WebApp.close();
+    });
 
     let gameOver = false;
     let score = 0; // Переменная для хранения очков
